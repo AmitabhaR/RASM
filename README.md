@@ -6,9 +6,5 @@ THE AUTHOR IS NOT RESPONSIBLE FOR ANY DAMAGE CAUSED WITH THIS SOFTWARE . Compili
 
 Windows
 =======
-Setup environment variables to the bin directory where gcc toolchain is installed.
-Open make in the folder where the .cpp files as well as the Makefile is kept and then run make.
-
-Ubuntu
-======
-Run make in the current directory and that does all for you.
+RASM.dev file is provided for compiling it with Dev C++ and that is the only and the best option to compile RASM.
+Alternative RASM.vcxproj is also provided to compile RASM with Visual C++.
