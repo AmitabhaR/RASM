@@ -1,7 +1,12 @@
 #include "numbers.hpp"
 #include <math.h>
 
-bool Numbers::checkHex( string str ) // Checks if the given string contains a hexa-decimal number or not.
+/*
+	Numbers::checkHex( ) :
+		Checks if the given string contains a hexa-decimal number or not.
+*/
+
+bool Numbers::checkHex( string str )
 {
 	if (str.length() > 3)
 	{
@@ -32,7 +37,12 @@ bool Numbers::checkHex( string str ) // Checks if the given string contains a he
     else return false;
 }
 
-bool Numbers::checkBinary( string str ) // Checks if the given string contains a binary number or not.
+/*
+	Numbers::checkBinary( ) :
+		Checks if the given string contains a binary number or not.
+*/
+
+bool Numbers::checkBinary( string str )
 {
     if (str.length( ) > 2) // Check if the length is greater than 2.
     {
@@ -50,7 +60,12 @@ bool Numbers::checkBinary( string str ) // Checks if the given string contains a
     else return false;
 }
 
-bool Numbers::checkInteger( string str ) // Checks if the given string contains a integer or not.
+/*
+	Numbers::checkInteger( ) :
+		Checks if the given string contains a integer or not.
+*/
+
+bool Numbers::checkInteger( string str )
 {
     for(int cnt = 0;cnt < str.length( );cnt++)
     {
@@ -61,7 +76,12 @@ bool Numbers::checkInteger( string str ) // Checks if the given string contains 
     return true;
 }
 
-int Numbers::getInteger( string str ) // Returns a integer out of a string.
+/*
+	Numbers::getInteger( ) :
+		Returns a integer out of a string.
+*/
+
+int Numbers::getInteger( string str )
 {
     int res_num = 0;
 	bool isNegative = false;
@@ -77,7 +97,12 @@ int Numbers::getInteger( string str ) // Returns a integer out of a string.
 	return (isNegative) ? -res_num : res_num;
 }
 
-int Numbers::getHex( string str ) // Returns a hexa-decimal in integer form from a string.
+/*
+	Numbers::getHex( ) :
+		Returns a hexa-decimal in integer form from a string.
+*/
+
+int Numbers::getHex( string str )
 {
     int res_num = 0;
 
@@ -91,7 +116,12 @@ int Numbers::getHex( string str ) // Returns a hexa-decimal in integer form from
     return res_num;
 }
 
-int Numbers::getBinary( string str) // Returns a binary in integer from from a string.
+/*
+	Numbers::getBinary( ) :
+		Returns a binary in integer from from a string.
+*/
+
+int Numbers::getBinary( string str)
 {
     int res_num = 0;
 
@@ -105,62 +135,71 @@ int Numbers::getBinary( string str) // Returns a binary in integer from from a s
     return res_num;
 }
 
+/*
+	Numbers::toHex( ) :
+		Returns a string representation of integer in hex form.
+*/
 
 string Numbers::toHex(int number) // Returns a string representation of integer in hex form.
 {
-	string ret_str;
-	string num_str;
+	string ret_str; // Return string handle.
+	string num_str; // Number string handle.
 
 	if (number < 0) ret_str = "-0x"; else ret_str = "0x";
 
-	while (number > 16)
+	while (number > 16) // Collect all the hexa-decimal digits.
 	{
-		int rem = number % 16;
+		int rem = number % 16; // Get the hexa-decimal digit.
 		number = number / 16;
 
-		if (rem > 9) num_str += (char) ('A' + rem - 10);
-		else num_str += rem;
+		if (rem > 9) num_str += (char) ('A' + rem - 10); // Add the letter hexa-decimal digit if more than 9.
+		else num_str += toInteger(rem); // Add only the digit.
 	}
 	
-	if (number > 9) num_str += (char) ('A' + number - 10);
+	if (number > 9) num_str += (char) ('A' + number - 10); // Add the letter hexa-decimal digit if more than 9.
 	else num_str += number;
 
-	num_str.reserve();
+	num_str.reserve(); // Reverse the digits.
 	
-	return (ret_str += num_str);
+	return (ret_str += num_str); // Return the final string.
 }
 
-string Numbers::toInteger(int num) // Returns a string representation of integer .
+/*
+	Numbers::toInteger( ) :
+		Returns a string representation of integer .	
+*/
+
+string Numbers::toInteger(int num)
 {
-	string ret_str;
+	string ret_str; // Return string handle.
 
-	if (num == 0) return "0";
-	else if (num < 0) ret_str = "-";
+	if (num == 0) return "0"; // If zero then return directly.
+	else if (num < 0) ret_str = "-"; // Negative check.
 
-	register int total_digits = 0;
-	register int reverse = 0;
+	register int total_digits = 0; // Total digits.
+	register int reverse = 0; // Reversed digits excluding zeros in the end.
 
 	while (num > 0)
 	{
-		reverse = reverse * 10 + (num % 10);
+		reverse = reverse * 10 + (num % 10); // Reverse formula.
 		num /= 10;
-		total_digits++;
+		total_digits++; // Increment digit counter.
 	}
 
-	register int counter = 0;
+	register int counter = 0; // Base counter.
 
 	while (reverse > 0)
 	{
-		ret_str += '0' + (reverse % 10);
-		reverse /= 10;
-		counter++;
+		ret_str += '0' + (reverse % 10); // Add the digits one by one.
+		reverse /= 10; // Obtain the next digit.
+		counter++; // Increment base counter.
 	}
 
 	while (counter < total_digits)
 	{
-		ret_str += '0';
-		counter++;
+		ret_str += '0'; // Add the remaining zeros.
+		counter++; // Increment base counter.
 	}
 
-	return ret_str;
+	return ret_str; // Return the final string.
 }

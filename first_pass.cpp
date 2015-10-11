@@ -4,7 +4,7 @@
 	Array of all registers for assembler including their sizes in bytes.
 */
 
-CPURegister register_flags[30] = { // Register name , size.
+CPURegister register_flags[] = { // Register name , size.
      {"r1", 1}, // A 1'st byte.
      {"r2", 1}, // A 2'nd byte.
      {"r3", 1}, // A 3'rd byte.
@@ -92,7 +92,9 @@ Instruction instruction_set[] = {
     { "jequ" , 8 , 0x0000000 , INSTRUCTION_MEMORY },
     { "jnequ" , 8 , 0x00000000 , INSTRUCTION_MEMORY },
     { "jg" , 8 , 0x00000000 , INSTRUCTION_MEMORY },
-    { "jl" , 8 , 0x00000000 , INSTRUCTION_MEMORY }
+    { "jl" , 8 , 0x00000000 , INSTRUCTION_MEMORY },
+	{ "push" , 4 , 0x00000000 , INSTRUCTION_REGISTER_ANY },
+	{ "pop",  4, 0x00000000, INSTRUCTION_REGISTER_ANY }
 };
 
 int instruction_count = sizeof(instruction_set) / sizeof(Instruction); // Public variable for number of instructions.
@@ -105,24 +107,24 @@ static int resolve_ids = -0xf; // Static variable for counting resolve ids for e
 		Also calculates end addresses for a assembler file.
 */
 
-void Pass1::pass(string file , int initial_address , list< list<string> > & token_tree_list , list<Label> & label_list , list<string> & error_list  , int & end_address)
+void Pass1::pass(string file , int initial_address , register list< list<string> > & token_tree_list , register list<Label> & label_list , register list<string> & error_list , int & end_address)
 {
-    int cur_section = SECTION_CODE; // Flag for current section of code.
-    int line_cntr = 1; // Line counter.
-    int address_counter = initial_address; // Address counter.
+    register int cur_section = SECTION_CODE; // Flag for current section of code.
+    register int line_cntr = 1; // Line counter.
+    register int address_counter = initial_address; // Address counter.
     list<string> resolving_symbols; // Symbol to be resolved list.
 
 	/*
 		Calculate opcodes for every instructions.
 	*/
 
-	for (int cnt = 0; cnt < instruction_count;) instruction_set[cnt].instruction_opcode = 0x1000 + (++cnt * 0xffff); // Maximum register register possibilites.
+	for (register int cnt = 0; cnt < instruction_count;) instruction_set[cnt].instruction_opcode = 0x1000 + (++cnt * 0xffff); // Maximum register register possibilites.
 
 	/*
 		Pass through every token and calculate label addresses according to sections.
 	*/
 
-	for (std::list< std::list<string> >::iterator cur_tree = token_tree_list.begin(); cur_tree != token_tree_list.end(); cur_tree++, line_cntr++)
+	for (register std::list< std::list<string> >::iterator cur_tree = token_tree_list.begin(); cur_tree != token_tree_list.end(); cur_tree++, line_cntr++)
 	{
 		bool isSuccess = false; // Flag for single instruction in line.
 		int tok_cntr = 1; // Token counter.
@@ -159,7 +161,7 @@ void Pass1::pass(string file , int initial_address , list< list<string> > & toke
 						Pass through every symbol in the symbol table.
 					*/
 
-					for (list<Label>::iterator cur_label = label_list.begin(); cur_label != label_list.end(); cur_label++)
+					for (register list<Label>::iterator cur_label = label_list.begin(); cur_label != label_list.end(); cur_label++)
 					{
 						if (cur_label->label_name == label_name) // Check if the label exists on the symbol table.
 						{
@@ -185,7 +187,7 @@ void Pass1::pass(string file , int initial_address , list< list<string> > & toke
 						Pass through every symbol in the symbol table.
 					*/
 
-					for (list<Label>::iterator cur_label = label_list.begin(); cur_label != label_list.end(); cur_label++)
+					for (register list<Label>::iterator cur_label = label_list.begin(); cur_label != label_list.end(); cur_label++)
 					{ 
 						if (cur_label->label_name == label_name) // Check if the label exists on the symbol table.
 						{
@@ -213,7 +215,7 @@ void Pass1::pass(string file , int initial_address , list< list<string> > & toke
 						Pass through every symbol in the symbol table.
 					*/
 
-					for (list<Label>::iterator cur_label = label_list.begin(); cur_label != label_list.end(); cur_label++)
+					for (register list<Label>::iterator cur_label = label_list.begin(); cur_label != label_list.end(); cur_label++)
 					{
 						if (cur_label->label_name == label_name) // Check if label exists on symbol table.
 						{
@@ -275,7 +277,7 @@ void Pass1::pass(string file , int initial_address , list< list<string> > & toke
 					with any one of them.
 				*/
 
-				for (int cntr = 0; cntr < instruction_count; cntr++)
+				for (register int cntr = 0; cntr < instruction_count; cntr++)
 				{
 					if (instruction_set[cntr].instruction_name == *cur_token) // Check if current token is this instruction.
 					{
@@ -299,5 +301,5 @@ void Pass1::pass(string file , int initial_address , list< list<string> > & toke
 		it is undefined in the current file.
 	*/
 
-	if (resolving_symbols.size() > 0) for(list<string>::iterator cur_label = resolving_symbols.begin( );cur_label != resolving_symbols.end( );cur_label++) error_list.push_back(Assembler::getErrorMessage("Undefined symbol " + *cur_label,file,0,0));
+	if (resolving_symbols.size() > 0) for(register list<string>::iterator cur_label = resolving_symbols.begin( );cur_label != resolving_symbols.end( );cur_label++) error_list.push_back(Assembler::getErrorMessage("Undefined symbol " + *cur_label,file,0,0));
 }

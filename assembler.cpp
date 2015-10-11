@@ -210,7 +210,7 @@ AssemblerRet Assembler::assemble(string hex_adr , string file_path)
 		Call pass2 . Generates opcodes. 
 	*/
 
-    Pass2::pass(file_path,Numbers::getHex(hex_adr),token_tree_list,asm_ret.label_list,asm_ret.error_list,asm_ret.gen_code,asm_ret.gen_data);
+    Pass2::pass(file_path,token_tree_list,asm_ret.label_list,asm_ret.error_list,asm_ret.gen_code,asm_ret.gen_data);
 
     return asm_ret; // Return our assembler return table.
 }

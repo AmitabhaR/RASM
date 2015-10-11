@@ -6,7 +6,7 @@
 class Pass2
 {
 public:
-    static void pass( string , int , list< list<string> > & , list<Label> & , list<string> & , list<char> & , list<char> &);
+    static void pass( string , list< list<string> > & , list<Label> & , list<string> & , list<char> & , list<char> &);
 };
 
 #endif

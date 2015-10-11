@@ -14,6 +14,7 @@ using namespace std;
 #define INSTRUCTION_REGISTER_MEMORY 0xe
 #define INSTRUCTION_MEMORY 0xa
 #define INSTRUCTION_REGISTER 0xb
+#define INSTRUCTION_REGISTER_ANY 0xbfffff
 #define INSTRUCTION_NONE 0x0
 
 struct Instruction
