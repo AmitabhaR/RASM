@@ -16,6 +16,19 @@
 using namespace std;
 
 /*
+	 String to print when no parameters are passed.
+*/
+
+char * rasm_empty_param = 
+						"RASM [flags] [files] \n"
+						"Options -> \n"
+						" -f - Select the output format. \n"
+						" -i - Select files for assembling. \n"
+						" -o - Select the output file. \n"
+						" -org - Select the initial address. \n"
+						;
+
+/*
 	main( ) :
 		Entry point of the program.
 */
@@ -24,7 +37,7 @@ int main(int argc , char* args[])
 {
     if (argc < 2)
     {
-        cout << "Error : No options passed!" << endl;
+        cout << rasm_empty_param << endl;
         return 0;
     }
 

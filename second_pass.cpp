@@ -14,7 +14,7 @@ extern int register_flags_count; // External reference to register count.
 
 static CPURegister * findRegister(string register_name)
 {
-	for (int cnt = 0; cnt < register_flags_count; cnt++) if (register_flags[cnt].register_name == register_name) return &register_flags[cnt];
+	for (register int cnt = 0; cnt < register_flags_count; cnt++) if (register_flags[cnt].register_name == register_name) return &register_flags[cnt];
 
     return NULL;
 }
@@ -27,7 +27,7 @@ static CPURegister * findRegister(string register_name)
 
 static int getRegisterCount(CPURegister reg)
 {
-    for(int cnt = 0;cnt < register_flags_count;cnt++) if (register_flags[cnt].register_name == reg.register_name) return cnt;
+    for(register int cnt = 0;cnt < register_flags_count;cnt++) if (register_flags[cnt].register_name == reg.register_name) return cnt;
 
     return -1;
 }

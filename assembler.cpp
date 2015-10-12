@@ -23,7 +23,7 @@ static list<string> extractTokens(int line_num , string file , string line , lis
 		*/
         if (!isString) // Non-string tokenizing.
         {
-            if (line[cnt] == ' ' || line[cnt] == '\t') // Check if white-space or tabs.
+            if (line[cnt] == ' ' || line[cnt] == '\t' || line[cnt] == -1) // Check if white-space or tabs.
             {
                 if (cur_token != "") // Check if there is a token.
                 {
@@ -50,11 +50,9 @@ static list<string> extractTokens(int line_num , string file , string line , lis
             }
             else if (line[cnt] == ';') // Check if a comment brace.
             {
-                if (cur_token != "")
-                {
-                    token_list.push_back(cur_token); 
-                    return token_list; // Return our token list to the caller.
-                }
+                if (cur_token != "") token_list.push_back(cur_token); 
+
+				return token_list; // Return our token list to the caller.
             }
             else cur_token += line[cnt]; // Add the current character to the token.
         }

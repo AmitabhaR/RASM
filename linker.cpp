@@ -9,9 +9,9 @@ extern int instruction_count; // External reference to instruction count.
 		Takes a opcode and returns a instruction handle to the caller.
 */
 
-static Instruction * findInstructionWithOpcode(int opcode)
+static Instruction * findInstructionWithOpcode(register int opcode)
 {
-	for (int cnt = 0; cnt < instruction_count; cnt++)
+	for (register int cnt = 0; cnt < instruction_count; cnt++)
 		if (cnt + 1 < instruction_count)
 			if ((instruction_set[cnt].instruction_opcode >= opcode) && (opcode < instruction_set[cnt + 1].instruction_opcode)) return &instruction_set[cnt];
 			else;
@@ -27,9 +27,9 @@ static Instruction * findInstructionWithOpcode(int opcode)
 
 static int bytesToInt(register char * bytes)
 {
-	int ret_int = 0;
+	register int ret_int = 0;
 
-	for (int c = 0; c < sizeof(int); c++) ((char *)&ret_int)[c] = bytes[c];
+	for (register int c = 0; c < sizeof(int); c++) ((char *)&ret_int)[c] = bytes[c];
 
 	return ret_int;
 }
