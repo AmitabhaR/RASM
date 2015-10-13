@@ -147,20 +147,23 @@ string Numbers::toHex(int number) // Returns a string representation of integer 
 
 	if (number < 0) ret_str = "-0x"; else ret_str = "0x";
 
-	while (number > 16) // Collect all the hexa-decimal digits.
+	while (number >= 16) // Collect all the hexa-decimal digits.
 	{
 		int rem = number % 16; // Get the hexa-decimal digit.
-		number = number / 16;
+		number /= 16;
 
 		if (rem > 9) num_str += (char) ('A' + rem - 10); // Add the letter hexa-decimal digit if more than 9.
 		else num_str += toInteger(rem); // Add only the digit.
 	}
 	
 	if (number > 9) num_str += (char) ('A' + number - 10); // Add the letter hexa-decimal digit if more than 9.
-	else num_str += number;
+	else num_str += Numbers::toInteger(number);
 
-	num_str.reserve(); // Reverse the digits.
+	string cp_str = "";
 	
+	for (register int cnt = num_str.length() - 1; cnt >= 0; cnt--) cp_str += num_str[cnt]; // Reverse the string.
+	num_str = cp_str; // Assign the reverse string.
+
 	return (ret_str += num_str); // Return the final string.
 }
 

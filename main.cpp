@@ -26,7 +26,49 @@ char * rasm_empty_param =
 						" -i - Select files for assembling. \n"
 						" -o - Select the output file. \n"
 						" -org - Select the initial address. \n"
+						" -map - Generate map file. \n"
 						;
+
+/*
+	generateMapFile( ) :
+		Generates a map file for the current output.
+*/
+
+static void generateMapFile(string base_file , string map_file , string begin_address , string end_address , list<AssemblerRet> & asm_list)
+{
+	if (map_file != "") // Check if map file is requested.
+	{
+		FILE * file = fopen(map_file.c_str(), "w"); // Create a new map file.
+
+		fprintf(file, "Map File - %s\n\n",base_file.c_str( )); // Print out the map file base.
+		fprintf(file,"Public Labels ->\n"); // Public labels.
+		
+		/*
+			Finds all the public labels in the assembled files and prints them.
+		*/
+
+		for (register list<AssemblerRet>::iterator cur_obj = asm_list.begin(); cur_obj != asm_list.end(); cur_obj++)
+			for (register list<Label>::iterator cur_label = cur_obj->label_list.begin(); cur_label != cur_obj->label_list.end(); cur_label++)
+				if (!cur_label->isExtern && cur_label->isPublic) fprintf(file, "%s\t\t%s\n",cur_label->label_name.c_str( ), Numbers::toHex(cur_label->label_address).c_str());
+
+		fprintf(file, "\nStatic Labels ->\n"); // Static lables.
+
+		/*
+			Finds all the static/private labels in the assembled files and prints them.
+		*/
+
+		for (register list<AssemblerRet>::iterator cur_obj = asm_list.begin(); cur_obj != asm_list.end(); cur_obj++)
+			for (register list<Label>::iterator cur_label = cur_obj->label_list.begin(); cur_label != cur_obj->label_list.end(); cur_label++)
+				if (!cur_label->isExtern && !cur_label->isPublic) fprintf(file, "%s\t\t%s\n",cur_label->label_name.c_str( ), Numbers::toHex(cur_label->label_address).c_str());
+
+		fprintf(file, "\nEntry Point : %s\n",begin_address.c_str( )); // Print the entry point.
+		fprintf(file, "End Point : %s\n", Numbers::toHex(Numbers::getHex(end_address) - 1).c_str( )); // Print the end point by subtracting one.
+
+		fflush(file); // Flush the data to the file.
+
+		fclose(file); // Close the file handle.
+	}
+}
 
 /*
 	main( ) :
@@ -44,6 +86,8 @@ int main(int argc , char* args[])
     string out_file_name; // Stores output file name.
     int out_format = 0; // Stores output format.
     string out_hex_adr; // Stores a string representation of hex address .
+	string begin_address; // Stores the initial address of the program.
+	string map_file = ""; // Stores the path for creating the map file.
     std::list<string> file_list; // List of files to be assembled.
 	bool isInputFiles = false; // Flag for obtaining input files from command list.
 
@@ -78,7 +122,7 @@ int main(int argc , char* args[])
                 return 0;
             }
         }
-        else if (cur_str == "-org") // Initial address of the program [Note : Paging is then disabled].
+        else if (cur_str == "-org") // Initial address of the program.
         {
 			if (++cnt >= argc)
 			{
@@ -98,6 +142,16 @@ int main(int argc , char* args[])
                 return 0;
             }
         }
+		else if (cur_str == "-map") // Map file generation.
+		{
+			if (++cnt >= argc)
+			{
+				cout << "Error : Expected a map file!" << endl;
+				return 0;
+			}
+
+			map_file = args[cnt];
+		}
         else if (cur_str == "-i") // The files to be passed.
         {
 			if (++cnt >= argc)
@@ -139,6 +193,8 @@ int main(int argc , char* args[])
     std::list<AssemblerRet> asm_ret_list; // Table of symbols of each individual files.
     bool isSuccess = true; // Flag for assembling success.
 
+	begin_address = out_hex_adr;
+
     // Call assembler for pass1 and pass2.
     for(std::list<string>::iterator cur_file = file_list.begin( );cur_file != file_list.end( );cur_file++)
     {
@@ -175,6 +231,8 @@ int main(int argc , char* args[])
 			return 0x0;
 		}
 		else CodeGenerator::generate_asm_output(out_format, out_file_name, asm_ret_list); // Call our code generator for generating the final file.
+
+		generateMapFile(out_file_name, map_file, begin_address , out_hex_adr, asm_ret_list); // Generate map file.
 
 		getchar(); // Halt.
 
