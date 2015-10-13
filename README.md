@@ -8,3 +8,7 @@ Windows
 =======
 RASM.dev file is provided for compiling it with Dev C++ and that is the only and the best option to compile RASM.
 Alternative RASM.vcxproj is also provided to compile RASM with Visual C++.
+
+Issuses
+=======
+1. Compiling in Visual C++ with Release builds causes some compile problem which dosen't appear in Debug . If the bug appears , please contact Microsoft. (Unfixed issue)
