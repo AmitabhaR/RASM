@@ -485,6 +485,14 @@ final:
 							else error_list.push_back(Assembler::getErrorMessage("Byte data overflow!", file, line_cntr, tok_cntr));
 							goto final_data;
 						}
+						else if ((*cur_token)[0] == '@')  // Check if string defination.
+						{
+							for (int cnt = 1; cnt < cur_token->length(); cnt++) data_list.push_back((*cur_token)[cnt]);   // Push all characters to data section.
+
+							data_list.push_back(NULL); // Push a null-byte for string.
+
+							goto final_data;
+						}
 						else for (register list<Label>::iterator cur_label = label_list.begin(); cur_label != label_list.end(); cur_label++)
 							if (cur_label->label_name == *cur_token) // Check if label is found.
 							{

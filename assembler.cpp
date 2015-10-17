@@ -5,6 +5,28 @@
 #include <stdio.h>
 
 /*
+	getEscapeSequence( ) :
+	 Returns a escape sequence by taking a base character.
+*/
+
+static int getEscapeSequence(char input_char)
+{
+	if (input_char == 'n') return '\n';
+	else if (input_char == 't') return '\t';
+	else if (input_char == 'v') return '\v';
+	else if (input_char == 'b') return '\b';
+	else if (input_char == 'r') return '\r';
+	else if (input_char == 'f') return '\f';
+	else if (input_char == 'a') return '\a';
+	else if (input_char == '\\') return '\\';
+	else if (input_char == '\'') return '\'';
+	else if (input_char == '\"') return '\"';
+	else if (input_char == '\0') return '\0';
+	else if (input_char == '\ooo') return '\ooo';
+	else return input_char;
+}
+
+/*
 	extractTokens( ) : 
 		Returns a list of tokens found in a given line.
 */
@@ -13,7 +35,7 @@ static list<string> extractTokens(int line_num , string file , string line , lis
 {
     string cur_token = ""; // Stores the current token.
     list<string> token_list; // List of tokens in the line.
-    bool isString = false; // Check if the token is a string.
+    bool isString = false , isEscapeSeq = false , isChar = false; // Check if the token is a string.
     int cnt = 0; // Counter .
 
     for(;cnt < line.length( );cnt++)
@@ -21,7 +43,7 @@ static list<string> extractTokens(int line_num , string file , string line , lis
 		/* 
 			Parse throught all the characters and follow the flags.
 		*/
-        if (!isString) // Non-string tokenizing.
+        if (!isString && !isEscapeSeq && !isChar) // Non-string tokenizing.
         {
             if (line[cnt] == ' ' || line[cnt] == '\t' || line[cnt] == -1) // Check if white-space or tabs.
             {
@@ -38,6 +60,13 @@ static list<string> extractTokens(int line_num , string file , string line , lis
                 cur_token = "@"; // String identifier for quicker searching.
                 isString = true; // Jump to the string extraction.
             }
+			else if (line[cnt] == '\'') // Check if character identifier.
+			{
+				if (cur_token != "") token_list.push_back(cur_token); // Add the current token to the list.
+
+				cur_token = ""; // Empty token.
+				isChar = true; // Jump to the character extraction.
+			}
             else if (line[cnt] == ',') // Check if comma identifier.
             {
                 if (cur_token != "")
@@ -56,15 +85,57 @@ static list<string> extractTokens(int line_num , string file , string line , lis
             }
             else cur_token += line[cnt]; // Add the current character to the token.
         }
-        else // String tokenizing.
+        else // String and Character tokenizing.
         {
-            if (line[cnt] == '\"') // Check if string identifier.
-            {
-                token_list.push_back(cur_token);
-                cur_token = "";
-                isString = false; // Jump back to non-string tokenizing.
-            }
-            else cur_token += line[cnt]; // Add character to current string.
+			if (isString)
+			{
+				if (line[cnt] == '\"') // Check if string identifier.
+				{
+					token_list.push_back(cur_token);
+					cur_token = "";
+					isString = false; // Jump back to non-string tokenizing.
+				}
+				else if (line[cnt] == '\\') // Check if escape sequences.
+				{
+					// Work with the escape sequence.
+					isString = false; 
+					isEscapeSeq = true;
+				}
+				else cur_token += line[cnt]; // Add character to current string.
+			}
+			else if (isChar)
+			{
+				if (line[cnt] == '\'') // Check if character literal ending.
+				{
+					if (isEscapeSeq) { token_list.push_back(cur_token); isEscapeSeq = false; goto char_end; } // Check if escape sequence character.
+					else if (cur_token.length() > 1) { error_list.push_back(Assembler::getErrorMessage("Expected only a character literal in line!", file, line_num, cnt)); goto char_end; } // Check if more than one character in token.
+
+					token_list.push_back(Numbers::toInteger(cur_token[0])); // Push the current token.
+char_end:
+					cur_token = ""; // Empty the string.
+					isChar = false; // Set current character to false.
+				}
+				else if (line[cnt] == '\\') // Check if escape sequence literal.
+				{
+					if (++cnt >= line.length()) break; // Check if not end of string.
+
+					cur_token = Numbers::toInteger(getEscapeSequence(line[cnt])); // Get the escape sequence value.
+					isEscapeSeq = true; // Use this flag for the work.
+				}
+				else cur_token += line[cnt]; // Add the character to the token.
+			}
+			else if (isEscapeSeq) // Escape sequences.
+			{
+				/*
+					Check all escape sequences and replace them in the string token.
+				*/
+
+				cur_token += (char) getEscapeSequence(line[cnt]);
+				
+				// Switch back to strings.
+				isEscapeSeq = false;
+				isString = true;
+			}
         }
     }
 
@@ -73,7 +144,7 @@ static list<string> extractTokens(int line_num , string file , string line , lis
 	*/
 
     if (isString) error_list.push_back(Assembler::getErrorMessage("Expected end of string literal!",file,line_num,cnt)); // Check if the string literal was not ended.
-    if (cur_token != "") token_list.push_back(cur_token); // Add the left over tokens.
+	if (cur_token != "") token_list.push_back(cur_token); // Add the left over tokens.
 
     return token_list; // Return back the list.
 }

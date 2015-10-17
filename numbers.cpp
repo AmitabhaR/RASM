@@ -69,8 +69,8 @@ bool Numbers::checkInteger( string str )
 {
     for(int cnt = 0;cnt < str.length( );cnt++)
     {
-        if (cnt == 0 && str[cnt] == '-') continue; else return false; // Check for negative integers.
-        if (!((str[cnt] >= '0' && str[cnt] <= '9'))) return false; // Check for existence of any illegal token
+        if (cnt == 0 && str[cnt] == '-') continue;
+        if (!(str[cnt] >= '0' && str[cnt] <= '9')) return false; // Check for existence of any illegal token
     }
 
     return true;
