@@ -256,7 +256,11 @@ void Pass1::pass(string file , int initial_address , register list< list<string>
 				}
 				else if (*cur_token == "db") // Check if byte defination.
 				{
-					address_counter++; // Increment address counter by sizeof a byte in bytes.
+					string str_value = *(++cur_token); // Get handle to the value.
+
+					if (str_value[0] == '@') address_counter += str_value.length() - 1; // Add up the size of the string except the string identifier.
+					else address_counter++; // Increment address counter by sizeof a byte in bytes.
+
 					goto loop_over;
 				}
 				else if (*cur_token == "dw") // Check if word defination.

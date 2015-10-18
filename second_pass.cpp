@@ -98,7 +98,6 @@ void Pass2::pass( string file , register list< list<string> > & token_tree_list,
                 }
 
                 if (cur_section == SECTION_CODE) // Check if code section.
-                {
                     for(register int cnt = 0;cnt < instruction_count;cnt++)
                     {
                         if (instruction_set[cnt].instruction_name == *cur_token) // If the instruction is found.
@@ -448,9 +447,7 @@ final:
                             break; // Jump to next line.
                         }
                     }
-                }
-                else
-                {
+                
 					register char * data_ptr; // Data buffer.
 					register int data_value = 0; // Data value.
 
@@ -463,7 +460,7 @@ final:
 							data_value = Numbers::getBinary(*cur_token); // Convert it to integer form.
 
 							if (data_value <= 0xff) // Check the data bounds.
-								data_list.push_back(data_value); // Add the data to data list.
+								if (cur_section == SECTION_DATA) data_list.push_back(data_value); else code_list.push_back(data_value); // Add the data to data list or code list.
 							else error_list.push_back(Assembler::getErrorMessage("Byte data overflow!", file, line_cntr, tok_cntr)); // Print out error.
 							goto final_data; // Jump to the end part.
 						}
@@ -472,7 +469,7 @@ final:
 							data_value = Numbers::getInteger(*cur_token); // Convert it to integer form.
 
 							if (data_value <= 0xff)
-								data_list.push_back(data_value);
+								if (cur_section == SECTION_DATA) data_list.push_back(data_value); else code_list.push_back(data_value); // Add the data to data list or code list.
 							else error_list.push_back(Assembler::getErrorMessage("Byte data overflow!", file, line_cntr, tok_cntr));
 							goto final_data;
 						}
@@ -481,15 +478,15 @@ final:
 							data_value = Numbers::getHex(*cur_token);
 
 							if (data_value <= 0xff)
-								data_list.push_back(data_value);
+								if (cur_section == SECTION_DATA) data_list.push_back(data_value); else code_list.push_back(data_value); // Add the data to data list or code list.
 							else error_list.push_back(Assembler::getErrorMessage("Byte data overflow!", file, line_cntr, tok_cntr));
 							goto final_data;
 						}
 						else if ((*cur_token)[0] == '@')  // Check if string defination.
 						{
-							for (int cnt = 1; cnt < cur_token->length(); cnt++) data_list.push_back((*cur_token)[cnt]);   // Push all characters to data section.
+							for (int cnt = 1; cnt < cur_token->length(); cnt++) if (cur_section == SECTION_DATA) data_list.push_back((*cur_token)[cnt]); else code_list.push_back((*cur_token)[cnt]);  // Push all characters to data section or code section.
 
-							data_list.push_back(NULL); // Push a null-byte for string.
+							if (cur_section == SECTION_DATA) data_list.push_back(NULL); else code_list.push_back(NULL); // Push a null-byte for string.
 
 							goto final_data;
 						}
@@ -497,7 +494,7 @@ final:
 							if (cur_label->label_name == *cur_token) // Check if label is found.
 							{
 								if (cur_label->label_address <= 0xff) // Check if address is a byte.
-									if (!cur_label->isExtern) data_list.push_back(cur_label->label_address); // Store the address in the data list.
+									if (!cur_label->isExtern) if (cur_section == SECTION_DATA) data_list.push_back(cur_label->label_address); else code_list.push_back(cur_label->label_address); // Store the address in the data list.
 										else error_list.push_back(Assembler::getErrorMessage("Extern labels cannot be used!", file, line_cntr, tok_cntr)); // Print out error.
 								else error_list.push_back(Assembler::getErrorMessage("Byte data overflow!", file, line_cntr, tok_cntr)); // Print out error.
 
@@ -516,7 +513,7 @@ final:
 							data_ptr = getBytes(sizeof(short), 0, data_value); // Convert the data into bytes.
 
 							if (data_value <= 0xffff)
-								for (int c = 0; c < sizeof(short); c++) data_list.push_back(data_ptr[c]); // Store the bytes in the data list.
+								for (int c = 0; c < sizeof(short); c++) if (cur_section == SECTION_DATA) data_list.push_back(data_ptr[c]); else code_list.push_back(data_ptr[c]); // Store the bytes in the data list.
 							else error_list.push_back(Assembler::getErrorMessage("Word data overflow!", file, line_cntr, tok_cntr)); // Print out error.
 
 							goto final_data;
@@ -527,7 +524,7 @@ final:
 							data_ptr = getBytes(sizeof(short), 0, data_value); 
 
 							if (data_value <= 0xffff)
-								for (int c = 0; c < sizeof(short); c++) data_list.push_back(data_ptr[c]);
+								for (int c = 0; c < sizeof(short); c++) if (cur_section == SECTION_DATA) data_list.push_back(data_ptr[c]); else code_list.push_back(data_ptr[c]);
 							else error_list.push_back(Assembler::getErrorMessage("Word data overflow!", file, line_cntr, tok_cntr)); // Print out error.
 
 							goto final_data;
@@ -538,7 +535,7 @@ final:
 							data_ptr = getBytes(sizeof(short), 0, data_value);
 
 							if (data_value <= 0xffff)
-								for (int c = 0; c < sizeof(short); c++) data_list.push_back(data_ptr[c]);
+								for (int c = 0; c < sizeof(short); c++) if (cur_section == SECTION_DATA) data_list.push_back(data_ptr[c]); else code_list.push_back(data_ptr[c]);
 							else error_list.push_back(Assembler::getErrorMessage("Word data overflow!", file, line_cntr, tok_cntr)); // Print out error.
 
 							goto final_data;
@@ -552,7 +549,7 @@ final:
 									{ 
 										data_ptr = getBytes(sizeof(short), 0, cur_label->label_address); // Convert address into bytes.
 
-										for (int c = 0; c < sizeof(short); c++) data_list.push_back(data_ptr[c]); // Store the address bytes in the data table.
+										for (int c = 0; c < sizeof(short); c++) if (cur_section == SECTION_DATA) data_list.push_back(data_ptr[c]); else code_list.push_back(data_ptr[c]); // Store the address bytes in the data table.
 									}
 									else error_list.push_back(Assembler::getErrorMessage("Extern labels cannot be used!", file, line_cntr, tok_cntr)); // Print out error.
 								}
@@ -573,7 +570,7 @@ final:
 							data_ptr = getBytes(sizeof(int), 0, data_value);
 
 							if (data_value <= 0xffffffff)
-								for (int c = 0; c < sizeof(int); c++) data_list.push_back(data_ptr[c]);
+								for (int c = 0; c < sizeof(int); c++) if (cur_section == SECTION_DATA) data_list.push_back(data_ptr[c]); else code_list.push_back(data_ptr[c]);
 							else error_list.push_back(Assembler::getErrorMessage("DWord data overflow!", file, line_cntr, tok_cntr)); // Print out error.
 
 							goto final_data;
@@ -584,7 +581,7 @@ final:
 							data_ptr = getBytes(sizeof(int), 0, data_value);
 
 							if (data_value <= 0xffffffff)
-								for (int c = 0; c < sizeof(int); c++) data_list.push_back(data_ptr[c]);
+								for (int c = 0; c < sizeof(int); c++) if (cur_section == SECTION_DATA) data_list.push_back(data_ptr[c]); else code_list.push_back(data_ptr[c]);
 							else error_list.push_back(Assembler::getErrorMessage("DWord data overflow!", file, line_cntr, tok_cntr)); // Print out error.
 
 							goto final_data;
@@ -595,7 +592,7 @@ final:
 							data_ptr = getBytes(sizeof(int), 0, data_value);
 
 							if (data_value <= 0xffffffff)
-								for (int c = 0; c < sizeof(int); c++) data_list.push_back(data_ptr[c]);
+								for (int c = 0; c < sizeof(int); c++) if (cur_section == SECTION_DATA) data_list.push_back(data_ptr[c]); else code_list.push_back(data_ptr[c]);
 							else error_list.push_back(Assembler::getErrorMessage("DWord data overflow!", file, line_cntr, tok_cntr)); // Print out error.
 
 							goto final_data;
@@ -609,7 +606,7 @@ final:
 									{
 										data_ptr = getBytes(sizeof(int), 0, cur_label->label_address); // Convert address into bytes.
 
-										for (int c = 0; c < sizeof(int); c++) data_list.push_back(data_ptr[c]); // Store the bytes in the data list.
+										for (int c = 0; c < sizeof(int); c++) if (cur_section == SECTION_DATA) data_list.push_back(data_ptr[c]); else code_list.push_back(data_ptr[c]); // Store the bytes in the data list.
 									}
 									else error_list.push_back(Assembler::getErrorMessage("Extern labels cannot be used!", file, line_cntr, tok_cntr)); // Print out error.
 								}
@@ -621,7 +618,6 @@ final:
 						error_list.push_back(Assembler::getErrorMessage("Unknown label given " + *cur_token + " at line", file, line_cntr, tok_cntr)); // Print out error.
 					}
 				final_data:;
-                }
             }
 			else
 			{
